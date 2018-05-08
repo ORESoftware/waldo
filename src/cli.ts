@@ -6,11 +6,30 @@ import path = require('path');
 import fs = require('fs');
 import {getCleanTrace} from "clean-trace";
 import {ErrorCallback} from "async";
+import {options} from "./cli-options";
+const dashdash = require('dashdash');
 
 const root = process.cwd();
+const parser = dashdash.createParser({options});
 
-const matches = function (p: string) {
-  return [/\/node_modules\//, /\/.git\//].some(function (r) {
+try {
+  var opts = parser.parse(process.argv);
+} catch (e) {
+  console.error('waldo: error:', e.message);
+  process.exit(1);
+}
+
+const matchesAnyRegex = opts.match.map((v: string) => new RegExp(v));
+const matchesNoneRegex = opts.not_match.map((v: string) => new RegExp(v));
+
+const matchesAny = function (p: string) {
+  return !matchesAnyRegex.some(function (r: RegExp) {
+    return r.test(p);
+  })
+};
+
+const matchesNone = function (p: string) {
+  return matchesNoneRegex.some(function (r: RegExp) {
     return r.test(p);
   })
 };
@@ -27,7 +46,7 @@ const searchDir = function (dir: string, cb: ErrorCallback<any>) {
       
       const x = path.resolve(dir + '/' + v);
       
-      if (matches(x + '/')) {
+      if (matchesAny(x + '/') || matchesNone(x + '/')) {
         return process.nextTick(cb);
       }
       
