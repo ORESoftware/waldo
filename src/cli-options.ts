@@ -23,7 +23,7 @@ export const options = [
     default: [] as Array<string>
   },
   {
-    names: ['not-match'],
+    names: ['not-match', 'n'],
     type: 'arrayOfString',
     help: 'Regex that files cannot match',
     default: [] as Array<string>

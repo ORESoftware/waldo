@@ -23,12 +23,22 @@ const matchesAnyRegex = opts.match.map((v: string) => new RegExp(v));
 const matchesNoneRegex = opts.not_match.map((v: string) => new RegExp(v));
 
 const matchesAny = function (p: string) {
+  
+  if (matchesAnyRegex.length < 1) {
+    return false;
+  }
+  
   return !matchesAnyRegex.some(function (r: RegExp) {
     return r.test(p);
   })
 };
 
 const matchesNone = function (p: string) {
+  
+  if (matchesNoneRegex.length < 1) {
+    return false;
+  }
+  
   return matchesNoneRegex.some(function (r: RegExp) {
     return r.test(p);
   })
