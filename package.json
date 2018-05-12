@@ -1,6 +1,6 @@
 {
   "name": "@oresoftware/waldo",
-  "version": "0.0.104",
+  "version": "0.0.105",
   "description": "Semver-oriented TypeScript library skeleton.",
   "main": "dist/index.js",
   "bin": {
@@ -9,7 +9,8 @@
   "types": "dist/index.d.ts",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "test": "suman test"
+    "test": "suman test",
+    "postinstall": "./postinstall.sh"
   },
   "repository": {
     "type": "git",
