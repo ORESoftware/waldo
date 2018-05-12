@@ -9,7 +9,17 @@ import {ErrorCallback} from "async";
 import {options} from "./cli-options";
 const dashdash = require('dashdash');
 
-const root = process.cwd();
+let root = process.cwd();
+
+if (process.argv[2]) {
+  if (path.isAbsolute(process.argv[2])) {
+    root = String(process.argv[2]).trim();
+  }
+  else {
+    root = path.resolve(root + '/' + String(process.argv[2]).trim());
+  }
+}
+
 const parser = dashdash.createParser({options});
 
 try {
