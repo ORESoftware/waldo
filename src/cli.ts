@@ -10,16 +10,6 @@ import {options} from "./cli-options";
 const dashdash = require('dashdash');
 
 let root = process.cwd();
-
-if (process.argv[2]) {
-  if (path.isAbsolute(process.argv[2])) {
-    root = String(process.argv[2]).trim();
-  }
-  else {
-    root = path.resolve(root + '/' + String(process.argv[2]).trim());
-  }
-}
-
 const parser = dashdash.createParser({options});
 
 try {
@@ -27,6 +17,15 @@ try {
 } catch (e) {
   console.error('waldo: error:', e.message);
   process.exit(1);
+}
+
+if (opts.path) {
+  if (path.isAbsolute(opts.path)) {
+    root = opts.path;
+  }
+  else {
+    root = path.resolve(root + '/' + opts.path);
+  }
 }
 
 const matchesAnyRegex = opts.match.map((v: string) => new RegExp(v));

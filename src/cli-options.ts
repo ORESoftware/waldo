@@ -27,5 +27,11 @@ export const options = [
     type: 'arrayOfString',
     help: 'Regex that files cannot match',
     default: [] as Array<string>
+  },
+  {
+    names: ['path', 'p'],
+    type: 'string',
+    help: 'Root path to search in.',
+    default: ''
   }
 ];
