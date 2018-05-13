@@ -14,30 +14,28 @@ waldo_orange='\033[1;33m'
 waldo_green='\033[1;32m'
 waldo_no_color='\033[0m'
 
+mkdir -p "$HOME/.oresoftware/bash";
+mkdir -p "$HOME/.oresoftware/execs";
+mkdir -p "$HOME/.oresoftware/nodejs";
 
-mkdir -p "$HOME/.waldo/nodejs/waldo"
+cat waldo.sh > "$HOME/.oresoftware/bash/waldo.sh"
 
-#cp -r dist "$HOME/.waldo/nodejs/waldo"
-#
-#root_waldo="/usr/local/bin/waldo"
-#rm -rf "$root_waldo" || echo "could not remove '$root_waldo'";
-#cat run.waldo.sh > "$root_waldo" && chmod u+x "$root_waldo" || {
-#  echo "Could not write file or change permissions for file '$root_waldo'"
-#}
-#
-#waldo_bin="$(npm bin -g)/waldo";
-#rm -rf "$waldo_bin" || echo "could not remove '$waldo_bin'";
-#cat run.waldo.sh > "$waldo_bin" && chmod u+x "$waldo_bin" || {
-#  echo "Could not write file or change permissions for file '$waldo_bin'"
-#}
+(
+
+  cd "$HOME/.oresoftware/nodejs";
+  waldo_skip_postinstall=yes npm install @oresoftware/waldo@latest
+) &
+
 
 if [[ -z "$(which waldo)" ]]; then
     echo "installing waldo globally...."
-    waldo_skip_postinstall=yes npm install -g waldo
+    waldo_skip_postinstall=yes npm install -g @oresoftware/waldo
 fi
 
+wait;
+
+
 #npm_root="$(npm root -g)";
-#
 #ln -sf "$PWD" "$npm_root/waldo" || echo "waldo folder already exists globally"
 #ln -sf "$(npm bin -g)/waldo" "$npm_root/waldo/dist/cli.js" || echo "waldo already installed globally";
 

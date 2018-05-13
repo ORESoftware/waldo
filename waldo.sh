@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
 
 
-if [[ -n "$(command -v waldo)" ]]; then
+waldo(){
 
-  command waldo "$@"
+    if [[ -n "$(command -v waldo)" ]]; then
 
-else
+      command waldo "$@"
 
-  "$HOME/.oresoftware/nodejs/node_modules/waldo/index.sh"
+    else
 
-fi
+      "$HOME/.oresoftware/nodejs/node_modules/waldo/index.sh"
+
+    fi
+
+}
+
+
 
