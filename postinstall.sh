@@ -32,6 +32,7 @@ mkdir -p "$HOME/.waldo/nodejs/waldo"
 #}
 
 if [[ -z "$(which waldo)" ]]; then
+    echo "installing waldo globally...."
     waldo_skip_postinstall=yes npm install -g waldo
 fi
 
