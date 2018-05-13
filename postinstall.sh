@@ -7,6 +7,8 @@ if [[ "$waldo_skip_postinstall" == "yes" ]]; then
    exit 0;
 fi
 
+export waldo_skip_postinstall="yes";
+
 waldo_gray='\033[1;30m'
 waldo_magenta='\033[1;35m'
 waldo_cyan='\033[1;36m'
@@ -14,25 +16,36 @@ waldo_orange='\033[1;33m'
 waldo_green='\033[1;32m'
 waldo_no_color='\033[0m'
 
-mkdir -p "$HOME/.oresoftware/bash";
-mkdir -p "$HOME/.oresoftware/execs";
-mkdir -p "$HOME/.oresoftware/nodejs";
+mkdir -p "$HOME/.oresoftware/bash" && {
 
-cat waldo.sh > "$HOME/.oresoftware/bash/waldo.sh"
+    cat waldo.sh > "$HOME/.oresoftware/bash/waldo.sh"
 
-(
+} || {
+ echo "could not create bash directory in $HOME/oresoftware.";
+}
 
-  cd "$HOME/.oresoftware/nodejs";
-  waldo_skip_postinstall=yes npm install @oresoftware/waldo@latest
-) &
+mkdir -p "$HOME/.oresoftware/execs" || echo "could not create execs directory in $HOME/oresoftware.";
+
+
+mkdir -p "$HOME/.oresoftware/nodejs/node_modules" && {
+
+    (
+      cd "$HOME/.oresoftware/nodejs";
+      npm install @oresoftware/waldo@latest
+    )
+
+} || {
+   echo "could not create 'nodejs' directory in $HOME/oresoftware.";
+}
+
 
 
 if [[ -z "$(which waldo)" ]]; then
     echo "installing waldo globally...."
-    waldo_skip_postinstall=yes npm install -g @oresoftware/waldo
+    npm install -g @oresoftware/waldo
 fi
 
-wait;
+#wait;
 
 
 #npm_root="$(npm root -g)";
