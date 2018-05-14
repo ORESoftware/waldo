@@ -29,6 +29,10 @@ mkdir -p "$HOME/.oresoftware/execs" || echo "could not create execs directory in
 
 mkdir -p "$HOME/.oresoftware/nodejs/node_modules" && {
 
+    if [[ ! -f "$HOME/.oresoftware/nodejs/package.json" ]]; then
+       cat "node_modules/@oresoftware/oresoftware.package.json/package.json" > "$HOME/.oresoftware/nodejs/package.json";
+    fi
+
     (
       cd "$HOME/.oresoftware/nodejs";
       npm install @oresoftware/waldo@latest
@@ -37,7 +41,6 @@ mkdir -p "$HOME/.oresoftware/nodejs/node_modules" && {
 } || {
    echo "could not create 'nodejs' directory in $HOME/oresoftware.";
 }
-
 
 
 if [[ -z "$(which waldo)" ]]; then

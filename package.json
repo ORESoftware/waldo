@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/ORESoftware/typescript-library-skeleton#readme",
   "dependencies": {
+    "@oresoftware/shell": "latest",
     "async": "^2.6.0",
     "clean-trace": "latest",
     "dashdash": "^1.14.1"
