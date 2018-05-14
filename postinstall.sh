@@ -16,22 +16,53 @@ waldo_orange='\033[1;33m'
 waldo_green='\033[1;32m'
 waldo_no_color='\033[0m'
 
-mkdir -p "$HOME/.oresoftware/bash" && {
 
-    cat waldo.sh > "$HOME/.oresoftware/bash/waldo.sh"
+mkdir -p "$HOME/.oresoftware" && {
+
+  (
+    curl -H 'Cache-Control: no-cache' \
+    "https://raw.githubusercontent.com/oresoftware/shell/master/shell.sh?$(date +%s)" \
+    --output "$HOME/.oresoftware/shell.sh" 2> /dev/null || {
+           echo "curl command failed to read shell.sh, now we should try wget..."
+    }
+  ) &
 
 } || {
- echo "could not create bash directory in $HOME/oresoftware.";
+
+  echo "could not create dir '$HOME/.oresoftware'";
+  exit 1;
+
 }
 
-mkdir -p "$HOME/.oresoftware/execs" || echo "could not create execs directory in $HOME/oresoftware.";
+
+
+mkdir -p "$HOME/.oresoftware/bash" && {
+    cat waldo.sh > "$HOME/.oresoftware/bash/waldo.sh" || {
+      echo "could not copy waldo.sh shell file to user home." >&2;
+    }
+} || {
+
+ echo "could not create bash directory in $HOME/oresoftware.";
+
+}
+
+
+mkdir -p "$HOME/.oresoftware/execs" || {
+    echo "could not create execs directory in $HOME/oresoftware.";
+}
 
 
 mkdir -p "$HOME/.oresoftware/nodejs/node_modules" && {
 
-    if [[ ! -f "$HOME/.oresoftware/nodejs/package.json" ]]; then
-       cat "node_modules/@oresoftware/oresoftware.package.json/package.json" > "$HOME/.oresoftware/nodejs/package.json";
-    fi
+   [ ! -f "$HOME/.oresoftware/nodejs/package.json" ]  && {
+     (
+        curl -H 'Cache-Control: no-cache' \
+          "https://raw.githubusercontent.com/oresoftware/shell/master/assets/package.json?$(date +%s)" \
+            --output "$HOME/.oresoftware/nodejs/package.json" 2> /dev/null || {
+            echo "curl command failed to read package.json, now we should try wget..." >&2
+      }
+     )
+    }
 
     (
       cd "$HOME/.oresoftware/nodejs";
@@ -48,7 +79,7 @@ if [[ -z "$(which waldo)" ]]; then
     npm install -g @oresoftware/waldo
 fi
 
-#wait;
+wait;
 
 
 #npm_root="$(npm root -g)";

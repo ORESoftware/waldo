@@ -9,7 +9,7 @@ waldo(){
 
     else
 
-      "$HOME/.oresoftware/nodejs/node_modules/waldo/index.sh"
+      "$HOME/.oresoftware/nodejs/node_modules/waldo/index.sh" "$@"
 
     fi
 
