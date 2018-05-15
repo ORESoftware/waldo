@@ -9,6 +9,12 @@ fi
 
 export waldo_skip_postinstall="yes";
 
+waldo_exec="@oresoftware/waldo";
+
+if [[ "$oresoftware_local_dev" == "yes" ]]; then
+     waldo_exec="/Users/alexamil/WebstormProjects/oresoftware/waldo";
+fi
+
 waldo_gray='\033[1;30m'
 waldo_magenta='\033[1;35m'
 waldo_cyan='\033[1;36m'
@@ -66,7 +72,7 @@ mkdir -p "$HOME/.oresoftware/nodejs/node_modules" && {
 
     (
       cd "$HOME/.oresoftware/nodejs";
-      npm install @oresoftware/waldo@latest
+      npm install "$waldo_exec"
     )
 
 } || {
@@ -76,7 +82,7 @@ mkdir -p "$HOME/.oresoftware/nodejs/node_modules" && {
 
 if [[ -z "$(which waldo)" ]]; then
     echo "installing waldo globally...."
-    npm install -g @oresoftware/waldo
+    npm install -g "$waldo_exec"
 fi
 
 wait;
