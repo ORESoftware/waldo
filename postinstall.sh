@@ -79,13 +79,13 @@ mkdir -p "$HOME/.oresoftware/nodejs/node_modules" && {
    echo "could not create 'nodejs' directory in $HOME/oresoftware.";
 }
 
+wait;
+
 
 if [[ -z "$(which waldo)" ]]; then
     echo "installing waldo globally...."
     npm install -g "$waldo_exec"
 fi
-
-wait;
 
 
 #npm_root="$(npm root -g)";
@@ -95,4 +95,4 @@ wait;
 
 echo -e "${waldo_green}Waldo was installed successfully.${waldo_no_color}";
 echo -e "Add the following line to your .bashrc/.bash_profile files:";
-echo -e "${waldo_cyan}. \"\$HOME/.waldo/waldo.sh\"${waldo_no_color}";
+echo -e "${waldo_cyan}. \"\$HOME/.oresoftware/bash/waldo.sh\"${waldo_no_color}";
