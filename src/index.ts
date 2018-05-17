@@ -38,7 +38,6 @@ export class WaldoSearch {
   matchesAnyRegex: Array<RegExp>;
   isViaCLI = false;
   pth: string;
-  results: Array<string>;
   
   constructor(pth: string | WaldoOpts, opts?: WaldoOpts) {
     
@@ -87,20 +86,19 @@ export class WaldoSearch {
   search(cb: ErrorValCallback): this {
     
     if (this.isViaCLI) {
-      this.__searchDir(this.pth, cb);
+      this.__searchDir(null, this.pth, cb);
       return this;
     }
     
-    const self = this;
-    this.results = [];
-    this.__searchDir(this.pth, function (err) {
-      cb(err, self.results);
+    const results: Array<string> = [];
+    this.__searchDir(results, this.pth, function (err) {
+      cb(err, results);
     });
     
     return this;
   }
   
-  private __searchDir(dir: string, cb: ErrorCallback<any>) {
+  private __searchDir(results: Array<string>, dir: string, cb: ErrorCallback<any>) {
     
     const self = this;
     
@@ -130,7 +128,7 @@ export class WaldoSearch {
               console.log(x)
             }
             else {
-              self.results.push(x);
+              results.push(x);
             }
             return cb();
           }
@@ -140,7 +138,7 @@ export class WaldoSearch {
             return cb();
           }
           
-          self.__searchDir(x, cb);
+          self.__searchDir(results, x, cb);
           
         });
         
