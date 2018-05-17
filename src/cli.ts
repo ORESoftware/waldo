@@ -8,6 +8,7 @@ import {getCleanTrace} from "clean-trace";
 import {ErrorCallback} from "async";
 import {options} from "./cli-options";
 const dashdash = require('dashdash');
+import {WaldoSearch} from "./index";
 
 let root = process.cwd();
 const parser = dashdash.createParser({options});
@@ -28,79 +29,22 @@ if (opts.path) {
   }
 }
 
-const matchesAnyRegex = opts.match.map((v: string) => new RegExp(v));
-const matchesNoneRegex = opts.not_match.map((v: string) => new RegExp(v));
+const matchesAnyOf = opts.match.map((v: string) => new RegExp(v));
+const matchesNoneOf = opts.not_match.map((v: string) => new RegExp(v));
 
-const matchesAny = function (p: string) {
+new WaldoSearch({
   
-  if (matchesAnyRegex.length < 1) {
-    return false;
-  }
+  path: root,
+  matchesAnyOf,
+  matchesNoneOf,
+  isViaCLI: true
   
-  return !matchesAnyRegex.some(function (r: RegExp) {
-    return r.test(p);
-  })
-};
-
-const matchesNone = function (p: string) {
-  
-  if (matchesNoneRegex.length < 1) {
-    return false;
-  }
-  
-  return matchesNoneRegex.some(function (r: RegExp) {
-    return r.test(p);
-  })
-};
-
-const searchDir = function (dir: string, cb: ErrorCallback<any>) {
-  
-  fs.readdir(dir, function (err, items) {
-    
-    if (err) {
-      return cb(err);
-    }
-    
-    async.eachLimit(items, 3, function (v, cb) {
-      
-      const x = path.resolve(dir + '/' + v);
-      
-      if (matchesAny(x + '/') || matchesNone(x + '/')) {
-        return process.nextTick(cb);
-      }
-      
-      fs.stat(x, function (err, stats) {
-        
-        if (err) {
-          return cb(err);
-        }
-        
-        if (stats.isFile()) {
-          console.log(x);
-          return cb();
-        }
-        
-        if (stats.isSymbolicLink()) {
-          console.error('waldo: symbolic links not supported:', x);
-          return cb();
-        }
-        
-        searchDir(x, cb);
-        
-      });
-      
-    }, cb);
-    
-  });
-  
-};
-
-searchDir(root, function (err: any) {
-  
+})
+.search(function (err) {
   if (err) {
     throw getCleanTrace(err);
   }
-  
 });
+
 
 

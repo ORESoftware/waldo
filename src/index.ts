@@ -12,12 +12,16 @@ export const r2gSmokeTest = function () {
 
 export interface WaldoOpts {
   isViaCLI?: boolean,
-  dirs: boolean,
-  files: boolean,
-  symlinks: boolean,
+  dirs?: boolean,
+  files?: boolean,
+  symlinks?: boolean,
   path: string
-  matchesAnyOf: Array<string | RegExp>,
-  matchesNoneOf: Array<string | RegExp>
+  matchesAnyOf?: Array<string | RegExp>,
+  matchesNoneOf?: Array<string | RegExp>
+}
+
+export interface ErrorValCallback {
+  (err: any, val?: Array<string>): void;
 }
 
 const flattenDeep = function (a: Array<any>): Array<any> {
@@ -34,8 +38,9 @@ export class WaldoSearch {
   matchesAnyRegex: Array<RegExp>;
   isViaCLI = false;
   pth: string;
+  results: Array<string>;
   
-  constructor(pth: string | WaldoOpts, opts: WaldoOpts) {
+  constructor(pth: string | WaldoOpts, opts?: WaldoOpts) {
     
     if (pth && typeof pth === 'object') {
       opts = pth as WaldoOpts;
@@ -79,11 +84,23 @@ export class WaldoSearch {
     })
   }
   
-  search(cb: ErrorCallback<any>) {
-    this.searchDir(this.pth, cb);
+  search(cb: ErrorValCallback): this {
+    
+    if (this.isViaCLI) {
+      this.__searchDir(this.pth, cb);
+      return this;
+    }
+    
+    const self = this;
+    this.results = [];
+    this.__searchDir(this.pth, function (err) {
+      cb(err, self.results);
+    });
+    
+    return this;
   }
   
-  searchDir(dir: string, cb: ErrorCallback<any>) {
+  private __searchDir(dir: string, cb: ErrorCallback<any>) {
     
     const self = this;
     
@@ -109,7 +126,12 @@ export class WaldoSearch {
           
           if (stats.isFile()) {
             // write to stdout if we are using the command line
-            self.isViaCLI && console.log(x);
+            if (self.isViaCLI) {
+              console.log(x)
+            }
+            else {
+              self.results.push(x);
+            }
             return cb();
           }
           
@@ -118,7 +140,7 @@ export class WaldoSearch {
             return cb();
           }
           
-          self.searchDir(x, cb);
+          self.__searchDir(x, cb);
           
         });
         
