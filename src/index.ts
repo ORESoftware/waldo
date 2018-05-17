@@ -38,6 +38,8 @@ export class WaldoSearch {
   matchesAnyRegex: Array<RegExp>;
   isViaCLI = false;
   pth: string;
+  showFiles: boolean;
+  showDirs: boolean;
   
   constructor(pth: string | WaldoOpts, opts?: WaldoOpts) {
     
@@ -58,6 +60,9 @@ export class WaldoSearch {
     
     this.matchesAnyRegex = flattenDeep([opts.matchesAnyOf]).filter(Boolean).map(regExpMap);
     this.matchesNoneRegex = flattenDeep([opts.matchesNoneOf]).filter(Boolean).map(regExpMap);
+    
+    this.showDirs = opts.dirs === true;
+    this.showFiles = opts.files === true || opts.dirs !== true;
     
   }
   
@@ -112,7 +117,7 @@ export class WaldoSearch {
         
         const x = path.resolve(dir + '/' + v);
         
-        if (self.matchesAny(x + '/') || self.matchesNone(x + '/')) {
+        if (self.matchesAny(x) || self.matchesNone(x) || self.matchesAny(x + '/') || self.matchesNone(x + '/')) {
           return process.nextTick(cb);
         }
         
@@ -124,11 +129,8 @@ export class WaldoSearch {
           
           if (stats.isFile()) {
             // write to stdout if we are using the command line
-            if (self.isViaCLI) {
-              console.log(x)
-            }
-            else {
-              results.push(x);
+            if (self.showFiles) {
+              self.isViaCLI ? console.log(x) : results.push(x);
             }
             return cb();
           }
@@ -136,6 +138,10 @@ export class WaldoSearch {
           if (stats.isSymbolicLink()) {
             console.error('waldo: symbolic links not supported:', x);
             return cb();
+          }
+          
+          if (self.showDirs) {
+            self.isViaCLI ? console.log(x) : results.push(x);
           }
           
           self.__searchDir(results, x, cb);

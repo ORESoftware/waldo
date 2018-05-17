@@ -1,47 +1,48 @@
 
 
-# Your Project Readme Goes Here
+# @oresoftware/waldo
 
-This project is used by:
-https://github.com/oresoftware/ts-project
-You can use ts-project to do things more automatically.
+GNU/BSD `find` kills me sometimes, so I wrote this.
 
-To do things more manually, continue on.
+### install:  
 
-Steps to making this project skeleton your own project base.
+```bash
 
-1. Clone this repo: <br>
-    `git clone https://github.com/ORESoftware/typescript-library-skeleton.git YOUR-PROJECT-NAME`
-2. Update package.json so that `name` property matches `YOUR-PROJECT-NAME`.
-3. Update other package.json fields so that they are accurate.
+# for command line tools
+npm install -g waldo
 
-To check to see if `YOUR-PROJECT-NAME` is available on NPM, uses this command at the command line:
+# for library usage
+npm install waldo --save
 
-`$ npm view YOUR-PROJECT-NAME`  # will give you a 404 if the name is available.
-
-
-### This project skeleton uses:
-
-* the correct semver initial value (npm init defaults to 1.0.0 which is just wrong).
-* typescript 2.x
-* nodejs version 9
-* travis (for automated testing of your library)
-* MIT license
-* good simple default settings for .gitignore / .npmignore / .editorconfig / .gitattributes
-* Transpiling from src to dist folders (by default, you can change it manually)
-
-
-To transpile files in place, instead of tranpiling from `'src'` to `'dist'`:
-
-<br>
-update tsconfig.json:
-
-```json
-"compilerOptions": {
-    "outDir": "dist"    // remove this line
-}
 ```
 
-For small projects with just one .ts/.js file, you can just get rid of the src/lib folder, and put your index.ts
-file in the root of the project. In that case, make sure to change the `main` property in package.json from 'lib/index.js' to
-'index.js'. Same with the `typings/types` properties. 
+### At the command line:
+
+##### Basic usage
+
+```bash
+waldo --path="."  ### lists all matching files (no dirs)
+```
+
+Note that if you omit the --path arg, it defaults to `$PWD/.`
+
+
+```bash
+waldo --path="." --dirs  ### lists just dirs, -d for short
+```
+
+```bash
+waldo --path="." --dirs --files  ### lists files and dirs, -f and -d for short
+```
+
+##### Using matching
+
+```bash
+waldo --path="." -n /node_modules/   # don't match any path that has /node_modules/ in it
+
+waldo --path="." -n ^/node_modules/   # don't match any path that starts with /node_modules/ 
+
+waldo --path="." -n '\.js$'   # don't match any path ends that with '.js'
+
+waldo --path="." -m '\.js$'   #  match only paths that end that with '.js'
+```

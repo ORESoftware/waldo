@@ -9,6 +9,8 @@ import {ErrorCallback} from "async";
 import {options} from "./cli-options";
 const dashdash = require('dashdash');
 import {WaldoSearch} from "./index";
+import chalk from "chalk";
+import * as util from "util";
 
 let root = process.cwd();
 const parser = dashdash.createParser({options});
@@ -29,15 +31,29 @@ if (opts.path) {
   }
 }
 
+if (opts._args && opts._args.length > 0) {
+  process.once('exit', function () {
+    console.error(chalk.red(
+      'You have an argument (probably a trailing argument) that is in vain =>',
+      chalk.red.bold(util.inspect(opts._args))
+    ));
+  });
+}
+
 const matchesAnyOf = opts.match.map((v: string) => new RegExp(v));
 const matchesNoneOf = opts.not_match.map((v: string) => new RegExp(v));
+
+console.log('matches any of:', matchesAnyOf);
+console.log('matches none of:', matchesNoneOf);
 
 new WaldoSearch({
   
   path: root,
   matchesAnyOf,
   matchesNoneOf,
-  isViaCLI: true
+  isViaCLI: true,
+  dirs: opts.dirs,
+  files: opts.files
   
 })
 .search(function (err) {

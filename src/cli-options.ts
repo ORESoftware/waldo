@@ -1,5 +1,3 @@
-
-
 export const options = [
   {
     name: 'version',
@@ -33,5 +31,29 @@ export const options = [
     type: 'string',
     help: 'Root path to search in.',
     default: ''
+  },
+  {
+    names: ['files', 'f'],
+    type: 'bool',
+    help: 'List files.',
+    default: null
+  },
+  {
+    names: ['dirs', 'd'],
+    type: 'bool',
+    help: 'List dirs.',
+    default: null
+  },
+  {
+    names: ['absolute', 'abs'],
+    type: 'bool',
+    help: 'Show absolute paths.',
+    default: true
+  },
+  {
+    names: ['relative', 'rel'],
+    type: 'bool',
+    help: 'Show relative paths.',
+    default: true
   }
 ];
