@@ -5,41 +5,36 @@ RUN apt-get -y install sudo
 RUN sudo apt-get -y update
 RUN apt-get install -y netcat
 
-RUN sudo echo "newuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN sudo echo "node ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+USER node
+RUN mkdir -p /home/node/app
+WORKDIR /home/node/app
 
-RUN useradd -ms /bin/bash newuser
-USER newuser
-ENV HOME=/home/newuser
-WORKDIR /home/newuser
+RUN sudo chmod -R 777 /home/node
+RUN sudo chmod -R 777 /home/node/app
 
-RUN mkdir -p "$HOME/.npm-global"
-ENV NPM_CONFIG_PREFIX="$HOME/.npm-global"
-#RUN npm config set prefix "$HOME/.npm-global"
-ENV PATH="$HOME/.npm-global/bin:$PATH"
+RUN sudo chown -R $(whoami) /home/node/app
+RUN sudo chown -R $(whoami) $(npm config get prefix)/lib
+RUN sudo chown -R $(whoami) $(npm config get prefix)/lib/node_modules
+RUN sudo chown -R $(whoami) $(npm config get prefix)/bin
+RUN sudo chown -R $(whoami) $(npm config get prefix)/share
+RUN sudo chown -R $(whoami) /usr/local/lib
+RUN sudo chown -R $(whoami) /usr/local/etc
 
-RUN sudo chown -R $(whoami) "$HOME/.npm-global"
-
-#RUN sudo chown -R $(whoami) $(npm config get prefix)/lib/node_modules
-#RUN sudo chown -R $(whoami) $(npm config get prefix)/bin
-#RUN sudo chown -R $(whoami) $(npm config get prefix)/share
-#RUN sudo chown -R $(whoami) /usr/local/lib
-#RUN sudo chown -R $(whoami) /usr/local/etc
-
-RUN  npm install -g typescript
+RUN npm install -g @oresoftware/modify.json
+RUN npm install -g r2g@latest #5
+RUN npm install -g typescript
 
 COPY package.json .
-RUN npm install --loglevel=warn
-
-#RUN sudo chown -R $(whoami) "$HOME/.npm-global"
-
+COPY postinstall.sh .
+COPY waldo.sh .
+RUN  npm install --loglevel=warn;
+RUN sudo chown -R $(whoami) /home/node/app
 
 ENV PATH="./node_modules/.bin:${PATH}"
 
-RUN echo "our user is $USER";
-
 COPY . .
-RUN tsc
+RUN sudo chmod -R 777 /home/node
+RUN tsc || echo "fail compilation";
 
-
-ENTRYPOINT ["./test/index.sh"]
-#ENTRYPOINT ["r2g"]
+ENTRYPOINT ["/bin/bash", "./test/index.sh"]

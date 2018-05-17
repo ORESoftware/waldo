@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ORESoftware/typescript-library-skeleton.git"
+    "url": "git+https://github.com/ORESoftware/waldo.git"
   },
   "keywords": [
     "typescript",
@@ -25,9 +25,9 @@
   "author": "TODO Yo.Mama",
   "license": "SEE LICENSE IN LICENSE.md",
   "bugs": {
-    "url": "https://github.com/ORESoftware/typescript-library-skeleton/issues"
+    "url": "https://github.com/ORESoftware/waldo/issues"
   },
-  "homepage": "https://github.com/ORESoftware/typescript-library-skeleton#readme",
+  "homepage": "https://github.com/ORESoftware/waldo#readme",
   "dependencies": {
     "@oresoftware/shell": "latest",
     "async": "^2.6.0",
