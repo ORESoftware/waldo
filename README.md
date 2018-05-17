@@ -56,11 +56,11 @@ import {WaldoSearch} from '@oresoftware/waldo';
 
 new WaldoSearch({
   
-  path: root,  // the path you which to search
+  path,  // the path you which to search
   matchesAnyOf,  // array of strings or RegExp
   matchesNoneOf, // array of strings or RegExp
-  dirs: opts.dirs,   // list dirs
-  files: opts.files   // list files (true by default)
+  dirs,   // list dirs
+  files   // list files (true by default)
   
 })
 .search((err, results) => {
