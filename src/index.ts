@@ -88,11 +88,31 @@ export class WaldoSearch {
     })
   }
   
-  search(cb: ErrorValCallback): this {
+  searchp(): Promise<Array<string>> {
+    
+    const self = this;
+    return new Promise(function (resolve, reject) {
+      
+      const results: Array<string> = [];
+      if (self.isViaCLI) {
+        self.__searchDir(results, self.pth, function (err) {
+          err ? reject(err) : resolve(results);
+        });
+      }
+      else {
+        self.__searchDir(results, self.pth, function (err) {
+          err ? reject(err) : resolve(results);
+        });
+      }
+      
+    });
+  }
+  
+  search(cb: ErrorValCallback) {
     
     if (this.isViaCLI) {
       this.__searchDir(null, this.pth, cb);
-      return this;
+      return;
     }
     
     const results: Array<string> = [];
@@ -100,7 +120,6 @@ export class WaldoSearch {
       cb(err, results);
     });
     
-    return this;
   }
   
   private __searchDir(results: Array<string>, dir: string, cb: ErrorCallback<any>) {

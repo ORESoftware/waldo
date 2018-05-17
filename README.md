@@ -46,3 +46,40 @@ waldo --path="." -n '\.js$'   # don't match any path ends that with '.js'
 
 waldo --path="." -m '\.js$'   #  match only paths that end that with '.js'
 ```
+
+
+# Library Usage
+
+```js
+
+import {WaldoSearch} from '@oresoftware/waldo';
+
+new WaldoSearch({
+  
+  path: root,  // the path you which to search
+  matchesAnyOf,  // array of strings or RegExp
+  matchesNoneOf, // array of strings or RegExp
+  dirs: opts.dirs,   // list dirs
+  files: opts.files   // list files (true by default)
+  
+})
+.search((err, results) => {
+
+    // results is your array of strings
+});
+
+
+```
+
+### to use with ES6 Promises
+
+##### => Use the searchp() method
+
+```js
+new WaldoSearch({...}).searchp().then(results => {
+
+    // results is your array of strings
+});
+
+```
+
