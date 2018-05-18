@@ -5,10 +5,15 @@ import path = require('path');
 import fs = require('fs');
 import {getCleanTrace} from "clean-trace";
 import {ErrorCallback} from "async";
+import {Readable, Transform} from "stream";
 
 export const r2gSmokeTest = function () {
   return true;
 };
+
+export interface Pushable {
+  push(str: any): any
+}
 
 export interface WaldoOpts {
   isViaCLI?: boolean,
@@ -40,6 +45,7 @@ export class WaldoSearch {
   pth: string;
   showFiles: boolean;
   showDirs: boolean;
+  transform: (chunk: Buffer, enc: string, cb: Function) => void;
   
   constructor(pth: string | WaldoOpts, opts?: WaldoOpts) {
     
@@ -95,12 +101,12 @@ export class WaldoSearch {
       
       const results: Array<string> = [];
       if (self.isViaCLI) {
-        self.__searchDir(results, self.pth, function (err) {
+        self.__searchDir(results, null, self.pth, function (err) {
           err ? reject(err) : resolve(results);
         });
       }
       else {
-        self.__searchDir(results, self.pth, function (err) {
+        self.__searchDir(results, null, self.pth, function (err) {
           err ? reject(err) : resolve(results);
         });
       }
@@ -111,18 +117,33 @@ export class WaldoSearch {
   search(cb: ErrorValCallback) {
     
     if (this.isViaCLI) {
-      this.__searchDir(null, this.pth, cb);
+      this.__searchDir(null, null, this.pth, cb);
       return;
     }
     
     const results: Array<string> = [];
-    this.__searchDir(results, this.pth, function (err) {
+    this.__searchDir(results, null, this.pth, function (err) {
       cb(err, results);
     });
     
   }
   
-  private __searchDir(results: Array<string>, dir: string, cb: ErrorCallback<any>) {
+  private static __transform(chunk: Buffer | string, enc: string, cb: Function) {
+    //  streams are dumb lol
+    cb(String(chunk));
+  }
+  
+  getReadableStream() {
+    const r = new Transform({
+      transform: this.transform || WaldoSearch.__transform
+    });
+    this.__searchDir(null, r, this.pth, function (err) {
+      err ? r.emit('error', err) : r.emit('end');
+    });
+    return r;
+  }
+  
+  private __searchDir(results: Array<string>, r: Transform, dir: string, cb: ErrorCallback<any>) {
     
     const self = this;
     
@@ -149,7 +170,8 @@ export class WaldoSearch {
           if (stats.isFile()) {
             // write to stdout if we are using the command line
             if (self.showFiles) {
-              self.isViaCLI ? console.log(x) : results.push(x);
+              self.isViaCLI ? console.log(x) :
+                (results ? results.push(x) : r.write(x));
             }
             return cb();
           }
@@ -160,10 +182,11 @@ export class WaldoSearch {
           }
           
           if (self.showDirs) {
-            self.isViaCLI ? console.log(x) : results.push(x);
+            self.isViaCLI ? console.log(x) :
+              (results ? results.push(x) : r.write(x));
           }
           
-          self.__searchDir(results, x, cb);
+          self.__searchDir(results, r, x, cb);
           
         });
         

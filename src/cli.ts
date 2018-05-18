@@ -12,6 +12,7 @@ import {WaldoSearch} from "./index";
 import chalk from "chalk";
 import * as util from "util";
 
+
 let root = process.cwd();
 const parser = dashdash.createParser({options});
 
@@ -43,8 +44,6 @@ if (opts._args && opts._args.length > 0) {
 const matchesAnyOf = opts.match.map((v: string) => new RegExp(v));
 const matchesNoneOf = opts.not_match.map((v: string) => new RegExp(v));
 
-console.log('matches any of:', matchesAnyOf);
-console.log('matches none of:', matchesNoneOf);
 
 new WaldoSearch({
   
