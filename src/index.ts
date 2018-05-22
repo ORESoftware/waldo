@@ -74,13 +74,15 @@ export class WaldoSearch {
   
   matchesAny(p: string) {
     
+    // console.log('there is regex:.', this.matchesAnyRegex);
+    
     if (this.matchesAnyRegex.length < 1) {
       return false;
     }
     
     return !this.matchesAnyRegex.some(function (r: RegExp) {
       return r.test(p);
-    })
+    });
   }
   
   matchesNone(p: string) {
@@ -90,6 +92,7 @@ export class WaldoSearch {
     }
     
     return this.matchesNoneRegex.some(function (r: RegExp) {
+      // console.log('testing', r, 'against', p);
       return r.test(p);
     })
   }
@@ -157,7 +160,11 @@ export class WaldoSearch {
         
         const x = path.resolve(dir + '/' + v);
         
-        if (self.matchesAny(x) || self.matchesNone(x) || self.matchesAny(x + '/') || self.matchesNone(x + '/')) {
+        if (self.matchesNone(x)) {
+          return process.nextTick(cb);
+        }
+        
+        if (self.matchesNone(x + '/')) {
           return process.nextTick(cb);
         }
         
@@ -169,6 +176,19 @@ export class WaldoSearch {
           
           if (stats.isFile()) {
             // write to stdout if we are using the command line
+            
+            if (self.matchesAny(x)) {
+              return process.nextTick(cb);
+            }
+            
+            if (self.matchesNone(x)) {
+              return process.nextTick(cb);
+            }
+            
+            if (self.matchesNone(x + '/')) {
+              return process.nextTick(cb);
+            }
+            
             if (self.showFiles) {
               self.isViaCLI ? console.log(x) :
                 (results ? results.push(x) : r.write(x));

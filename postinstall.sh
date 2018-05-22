@@ -27,7 +27,6 @@ waldo_no_color='\033[0m'
 
 mkdir -p "$ores_home" && {
 
-  (
     echo "reading shell.sh file from Github...";
     curl -H 'Cache-Control: no-cache' \
     "https://cdn.rawgit.com/ORESoftware/shell/a49dc374/shell.sh?$(date +%s)" \
@@ -36,7 +35,6 @@ mkdir -p "$ores_home" && {
      } || {
            echo "curl command failed to read shell.sh, now we should try wget..."
     }
-  ) &
 
 } || {
 
@@ -90,14 +88,6 @@ mkdir -p "$ores_home/nodejs/node_modules" && {
 } || {
    echo "could not create 'nodejs' directory in '$ores_home'.";
 }
-
-wait;
-
-
-if [[ -z "$(which waldo)" ]]; then
-    echo "installing waldo globally...."
-    npm install -g "$waldo_exec"
-fi
 
 
 #npm_root="$(npm root -g)";
