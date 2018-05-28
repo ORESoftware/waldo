@@ -13,4 +13,6 @@ waldo(){
 }
 
 
+export -f waldo;
+
 
