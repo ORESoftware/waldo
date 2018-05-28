@@ -3,16 +3,13 @@
 
 waldo(){
 
-    if [[ -n "$(command -v waldo)" ]]; then
+   if [[ -z "`command -v waldo`" ]]; then
+       npm install -g "@oresoftware/waldo" || {
+         return 1;
+      }
+   fi
 
-      command waldo "$@"
-
-    else
-
-      "$HOME/.oresoftware/nodejs/node_modules/waldo/index.sh" "$@"
-
-    fi
-
+   command waldo "$@"
 }
 
 
