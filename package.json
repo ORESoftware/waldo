@@ -1,6 +1,6 @@
 {
   "name": "@oresoftware/waldo",
-  "version": "0.0.125",
+  "version": "0.0.126",
   "description": "Semver-oriented TypeScript library skeleton.",
   "main": "dist/index.js",
   "bin": {
@@ -10,7 +10,7 @@
   "typings": "dist/index.d.ts",
   "scripts": {
     "test": "suman test",
-    "postinstall": "./postinstall.sh"
+    "postinstall": "./assets/postinstall.sh"
   },
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
   "homepage": "https://github.com/ORESoftware/waldo#readme",
   "dependencies": {
     "@oresoftware/shell": "latest",
-    "async": "^2.6.0",
+    "async": "^2.6.1",
     "chalk": "^2.4.1",
     "clean-trace": "latest",
     "dashdash": "^1.14.1"
@@ -38,7 +38,7 @@
   "devDependencies": {
     "@types/async": "^2.0.49",
     "@types/core-js": "^0.9.46",
-    "@types/node": "^9.6.2"
+    "@types/node": "^9.6.18"
   },
   "b3val": 3
 }
