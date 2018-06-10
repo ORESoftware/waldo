@@ -3,7 +3,7 @@
 
 waldo(){
 
-   if [[ -z "`command -v waldo`" ]]; then
+   if [[ -z "$(command -v waldo)" ]]; then
        npm install -g "@oresoftware/waldo" || {
          return 1;
       }
