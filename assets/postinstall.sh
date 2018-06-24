@@ -57,7 +57,7 @@ mkdir -p "$ores_home/bash" || {
 
 
 echo "copying waldo.sh file from codebase to user home...";
-cat assets/waldo.sh > "$ores_home/bash/waldo.sh" || {
+cat assets/shell.sh > "$ores_home/bash/waldo.sh" || {
   echo "could not copy waldo.sh shell file to user home." >&2;
   exit 1;
 }
