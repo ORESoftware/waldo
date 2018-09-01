@@ -3,8 +3,7 @@
 import async = require('async');
 import path = require('path');
 import fs = require('fs');
-import {getCleanTrace} from "clean-trace";
-import {ErrorCallback} from "async";
+import chalk from 'chalk';
 import {Readable, Transform} from "stream";
 
 export const r2gSmokeTest = function () {
@@ -25,10 +24,6 @@ export interface WaldoOpts {
   matchesNoneOf?: Array<string | RegExp>
 }
 
-export interface ErrorValCallback {
-  (err: any, val?: Array<string>): void;
-}
-
 const flattenDeep = function (a: Array<any>): Array<any> {
   return a.reduce((acc, val) => Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val), []);
 };
@@ -36,6 +31,9 @@ const flattenDeep = function (a: Array<any>): Array<any> {
 const regExpMap = function (v: string | RegExp) {
   return (v instanceof RegExp) ? v : new RegExp(v);
 };
+
+export type EVCb<T> = (err: any, val?: T) => void;
+export type SearchQueueTask = (cb: EVCb<any>) => void;
 
 export class WaldoSearch {
   
@@ -46,6 +44,7 @@ export class WaldoSearch {
   showFiles: boolean;
   showDirs: boolean;
   transform: (chunk: Buffer, enc: string, cb: Function) => void;
+  queue = async.queue<SearchQueueTask, any>((task, cb) => task(cb), 8);
   
   constructor(pth: string | WaldoOpts, opts?: WaldoOpts) {
     
@@ -70,9 +69,11 @@ export class WaldoSearch {
     this.showDirs = opts.dirs === true;
     this.showFiles = opts.files === true || opts.dirs !== true;
     
+    console.log(this);
+    
   }
   
-  matchesAny(p: string) {
+  private matchesAny(p: string) {
     
     // console.log('there is regex:.', this.matchesAnyRegex);
     
@@ -80,44 +81,33 @@ export class WaldoSearch {
       return false;
     }
     
-    return !this.matchesAnyRegex.some(function (r: RegExp) {
+    return !this.matchesAnyRegex.some((r: RegExp) => {
       return r.test(p);
     });
   }
   
-  matchesNone(p: string) {
+  private matchesNone(p: string) {
     
     if (this.matchesNoneRegex.length < 1) {
       return false;
     }
     
-    return this.matchesNoneRegex.some(function (r: RegExp) {
+    return this.matchesNoneRegex.some((r: RegExp) => {
       // console.log('testing', r, 'against', p);
       return r.test(p);
     })
   }
   
   searchp(): Promise<Array<string>> {
-    
-    const self = this;
-    return new Promise(function (resolve, reject) {
-      
+    return new Promise((resolve, reject) => {
       const results: Array<string> = [];
-      if (self.isViaCLI) {
-        self.__searchDir(results, null, self.pth, function (err) {
-          err ? reject(err) : resolve(results);
-        });
-      }
-      else {
-        self.__searchDir(results, null, self.pth, function (err) {
-          err ? reject(err) : resolve(results);
-        });
-      }
-      
+      this.__searchDir(results, null, this.pth, (err) => {
+        err ? reject(err) : resolve(results);
+      });
     });
   }
   
-  search(cb: ErrorValCallback) {
+  search(cb: EVCb<Array<string>>) {
     
     if (this.isViaCLI) {
       this.__searchDir(null, null, this.pth, cb);
@@ -125,7 +115,7 @@ export class WaldoSearch {
     }
     
     const results: Array<string> = [];
-    this.__searchDir(results, null, this.pth, function (err) {
+    this.__searchDir(results, null, this.pth, err => {
       cb(err, results);
     });
     
@@ -146,73 +136,75 @@ export class WaldoSearch {
     return r;
   }
   
-  private __searchDir(results: Array<string>, r: Transform, dir: string, cb: ErrorCallback<any>) {
+  private __searchDir(results: Array<string>, r: Transform, dir: string, cb: EVCb<any>) {
     
-    const self = this;
-    
-    fs.readdir(dir, function (err, items) {
+    this.queue.push(cb => {
       
-      if (err) {
-        return cb(err);
-      }
-      
-      async.eachLimit(items, 3, function (v, cb) {
+      fs.readdir(dir, (err, items) => {
         
-        const x = path.resolve(dir + '/' + v);
-        
-        if (self.matchesNone(x)) {
-          return process.nextTick(cb);
+        if (err) {
+          console.error(chalk.magenta(err.message));
+          return cb(null);
         }
         
-        if (self.matchesNone(x + '/')) {
-          return process.nextTick(cb);
+        if (items.length < 1) {
+          return cb(null);
         }
         
-        fs.stat(x, function (err, stats) {
+        async.eachLimit(items, 5, (v, cb) => {
           
-          if (err) {
-            return cb(err);
+          const x = path.resolve(dir + '/' + v);
+          
+          if (this.matchesNone(x)) {
+            return process.nextTick(cb);
           }
           
-          if (stats.isFile()) {
-            // write to stdout if we are using the command line
-            
-            if (self.matchesAny(x)) {
-              return process.nextTick(cb);
-            }
-            
-            if (self.matchesNone(x)) {
-              return process.nextTick(cb);
-            }
-            
-            if (self.matchesNone(x + '/')) {
-              return process.nextTick(cb);
-            }
-            
-            if (self.showFiles) {
-              self.isViaCLI ? console.log(x) :
-                (results ? results.push(x) : r.write(x));
-            }
-            return cb();
+          if (this.matchesNone(x + '/')) {
+            return process.nextTick(cb);
           }
           
-          if (stats.isSymbolicLink()) {
-            console.error('waldo: symbolic links not supported:', x);
-            return cb();
-          }
+          fs.lstat(x, (err, stats) => {
+            
+            if (err) {
+              console.error(chalk.magenta(err.message));
+              return cb(null);
+            }
+            
+            if (!stats.isDirectory()) {
+              // write to stdout if we are using the command line
+              
+              if (this.matchesAny(x)) {
+                return cb(null);
+              }
+              
+              if (this.matchesNone(x)) {
+                return cb(null);
+              }
+              
+              if (this.matchesNone(x + '/')) {
+                return cb(null);
+              }
+              
+              if (this.showFiles) {
+                this.isViaCLI ? console.log(x) : (results ? results.push(x) : r.write(x));
+              }
+              
+              return cb(null);
+            }
+            
+            if (this.showDirs) {
+              this.isViaCLI ? console.log(x) : (results ? results.push(x) : r.write(x));
+            }
+            
+            this.__searchDir(results, r, x, cb);
+            
+          });
           
-          if (self.showDirs) {
-            self.isViaCLI ? console.log(x) :
-              (results ? results.push(x) : r.write(x));
-          }
-          
-          self.__searchDir(results, r, x, cb);
-          
-        });
+        }, cb);
         
-      }, cb);
+      });
       
-    });
+    }, cb);
     
   };
   

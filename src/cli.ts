@@ -1,17 +1,13 @@
 #!/usr/bin/env node
 'use strict';
 
-import async = require('async');
 import path = require('path');
-import fs = require('fs');
 import {getCleanTrace} from "clean-trace";
-import {ErrorCallback} from "async";
 import {options} from "./cli-options";
 const dashdash = require('dashdash');
 import {WaldoSearch} from "./index";
 import chalk from "chalk";
 import * as util from "util";
-
 
 let root = process.cwd();
 const parser = dashdash.createParser({options});
@@ -44,7 +40,6 @@ if (opts._args && opts._args.length > 0) {
 const matchesAnyOf = opts.match.map((v: string) => new RegExp(v));
 const matchesNoneOf = opts.not_match.map((v: string) => new RegExp(v));
 
-
 new WaldoSearch({
   
   path: root,
@@ -55,7 +50,10 @@ new WaldoSearch({
   files: opts.files
   
 })
-.search(function (err) {
+.search((err) => {
+  
+  console.log('all done...');
+  
   if (err) {
     throw getCleanTrace(err);
   }
