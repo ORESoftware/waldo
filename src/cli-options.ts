@@ -15,6 +15,12 @@ export const options = [
     help: 'Verbose output. Use multiple times for more verbose.'
   },
   {
+    names: ['must-match', 'M'],
+    type: 'arrayOfString',
+    help: 'Files must match at least one of these.',
+    default: [] as Array<string>
+  },
+  {
     names: ['match', 'm'],
     type: 'arrayOfString',
     help: 'Files must match at least one of these.',
@@ -28,32 +34,59 @@ export const options = [
   },
   {
     names: ['path', 'p'],
-    type: 'string',
-    help: 'Root path to search in.',
+    type: 'arrayOfString',
+    help: 'Root path(s) to search in.',
     default: ''
+  },
+  {
+    names: ['ordered'],
+    type: 'bool',
+    help: 'Get ordered output.',
+    default: false
   },
   {
     names: ['files', 'f'],
     type: 'bool',
-    help: 'List files.',
-    default: null
+    help: 'Do not print files.',
+    default: false
   },
   {
     names: ['dirs', 'd'],
     type: 'bool',
-    help: 'List dirs.',
-    default: null
+    help: 'Do not print dirs.',
+    default: false
+  },
+  {
+    names: ['symlinks', 's'],
+    type: 'bool',
+    help: 'Do not print symlinks.',
+    default: false
+  },
+  {
+    names: ['follow-symlinks'],
+    type: 'bool',
+    help: 'Follow symlinks.',
+    default: false
   },
   {
     names: ['absolute', 'abs'],
     type: 'bool',
     help: 'Show absolute paths.',
-    default: true
-  },
-  {
-    names: ['relative', 'rel'],
-    type: 'bool',
-    help: 'Show relative paths.',
-    default: true
+    default: false
   }
 ];
+
+
+export interface CliOptions {
+  absolute: boolean,
+  follow_symlinks: boolean,
+  symlinks: boolean,
+  files: boolean,
+  dirs: boolean,
+  path: Array<string>,
+  ordered: boolean,
+  match: Array<string>,
+  not_match: Array<string>,
+  must_match: Array<string>,
+  _args: Array<string>
+}

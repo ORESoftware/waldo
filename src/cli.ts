@@ -3,29 +3,29 @@
 
 import path = require('path');
 import {getCleanTrace} from "clean-trace";
-import {options} from "./cli-options";
+import {CliOptions, options} from "./cli-options";
 const dashdash = require('dashdash');
 import {WaldoSearch} from "./index";
 import chalk from "chalk";
 import * as util from "util";
+import {flattenDeep, getUniqueList} from './utils';
 
-let root = process.cwd();
+const root = process.cwd();
 const parser = dashdash.createParser({options});
 
 try {
-  var opts = parser.parse(process.argv);
+  var opts = <CliOptions>parser.parse(process.argv);
 } catch (e) {
   console.error('waldo: error:', e.message);
   process.exit(1);
 }
 
-if (opts.path) {
-  if (path.isAbsolute(opts.path)) {
-    root = opts.path;
-  }
-  else {
-    root = path.resolve(root + '/' + opts.path);
-  }
+const paths = flattenDeep([opts.path]).map(v => String(v || '').trim()).filter(Boolean).map(v => {
+   return path.isAbsolute(v) ? v: path.resolve(root + '/' + v);
+});
+
+if(paths.length < 1){
+  paths.push(root);
 }
 
 if (opts._args && opts._args.length > 0) {
@@ -37,26 +37,40 @@ if (opts._args && opts._args.length > 0) {
   });
 }
 
-const matchesAnyOf = opts.match.map((v: string) => new RegExp(v));
-const matchesNoneOf = opts.not_match.map((v: string) => new RegExp(v));
+
+const getUnique = (v: Array<string>): Array<string> => {
+  return getUniqueList(flattenDeep([v])
+  .map(v => String(v || '').trim())
+  .filter(Boolean)
+  .map((v: string) => new RegExp(v)));
+};
+
+const matchesAnyOf = getUnique(opts.match);
+const matchesNoneOf = getUnique(opts.not_match);
+const matchesAllOf = getUnique(opts.must_match);
 
 new WaldoSearch({
-  
-  path: root,
+  printAbsolutePaths: Boolean(opts.absolute),
+  paths: paths,
   matchesAnyOf,
+  matchesAllOf,
   matchesNoneOf,
   isViaCLI: true,
-  dirs: opts.dirs,
-  files: opts.files
-  
+  dirs: Boolean(opts.dirs),
+  files: Boolean(opts.files)
 })
-.search((err) => {
+.search((err: any, {warningsCount}) => {
   
-  console.log('all done...');
+  if(warningsCount > 0){
+    console.error(`Finished searching with ${warningsCount} warnings.`)
+  }
+  
+  console.log('all done.');
   
   if (err) {
     throw getCleanTrace(err);
   }
+  
 });
 
 

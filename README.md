@@ -21,18 +21,25 @@ npm install waldo --save
 ##### Basic usage
 
 ```bash
-waldo --path="."  ### lists all matching files (no dirs)
+waldo  ### lists all matching files and dirs in the current working dir
+```
+
+```bash
+waldo --path="."  ### lists all matching files and dirs, in the current working dir
 ```
 
 Note that if you omit the --path arg, it defaults to `$PWD/.`
 
-
 ```bash
-waldo --path="." --dirs  ### lists just dirs, -d for short
+waldo --path="." --dirs  ### will not list dirs, -d for short
 ```
 
 ```bash
-waldo --path="." --dirs --files  ### lists files and dirs, -f and -d for short
+waldo --path="." --files  ### will not list files, -f for short
+```
+
+```bash
+waldo --path="." --symlinks  ### will not list symlinks, -s for short
 ```
 
 ##### Using matching
