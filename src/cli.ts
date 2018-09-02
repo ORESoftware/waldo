@@ -25,9 +25,7 @@ try {
 const paths = flattenDeep([opts.path])
 .map(v => String(v || '').trim())
 .filter(Boolean)
-.map(v => {
-  return path.isAbsolute(v) ? v : path.resolve(root + '/' + v);
-});
+.map(v => path.isAbsolute(v) ? v : path.resolve(root + '/' + v));
 
 if (paths.length < 1) {
   paths.push(root);
