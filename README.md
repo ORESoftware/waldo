@@ -23,12 +23,17 @@ npm install waldo --save
 ```bash
 waldo  ### lists all matching files and dirs in the current working dir
 ```
+(Note that if you omit the --path arg, it defaults to `$PWD.`)
+
+<br>
 
 ```bash
 waldo --path="."  ### lists all matching files and dirs, in the current working dir
 ```
 
-Note that if you omit the --path arg, it defaults to `$PWD/.`
+```bash
+waldo --path="src" --path="test"  ### lists all matching files and dirs, in the src and test dirs
+```
 
 ```bash
 waldo --path="." --dirs  ### will not list dirs, -d for short
@@ -42,12 +47,20 @@ waldo --path="." --files  ### will not list files, -f for short
 waldo --path="." --symlinks  ### will not list symlinks, -s for short
 ```
 
+```bash
+waldo --path="." --follow-symlinks  ### will use stat instead of lstat
+```
+
 ##### Using matching
+
+Waldo uses JavaScript regular expressions internally for matching.
 
 ```bash
 waldo --path="." -n /node_modules/   # don't match any path that has /node_modules/ in it
 
 waldo --path="." -n ^/node_modules/   # don't match any path that starts with /node_modules/ 
+
+waldo --path="." -n /^node_modules/   # don't match any path that starts with node_modules
 
 waldo --path="." -n '\.js$'   # don't match any path ends that with '.js'
 
@@ -59,7 +72,7 @@ waldo --path="." -m '\.js$'   #  match only paths that end that with '.js'
 
 ```js
 
-import {WaldoSearch} from '@oresoftware/waldo';
+import {WaldoSearch} from 'waldo';
 
 new WaldoSearch({
   
@@ -70,9 +83,11 @@ new WaldoSearch({
   files   // list files (true by default)
   
 })
-.search((err, results) => {
+.search((err, v) => {
 
-    // results is your array of strings
+    // v.results is your array of paths/strings
+    // v.warnings is an array of Errors (permissions errors)
+
 });
 
 
@@ -83,9 +98,11 @@ new WaldoSearch({
 ##### => Use the searchp() method
 
 ```js
-new WaldoSearch({...}).searchp().then(results => {
+new WaldoSearch({...}).searchp().then(v => {
 
-    // results is your array of strings
+   // v.results is your array of paths/strings
+   // v.warnings is an array of Errors (permissions errors)
+   
 });
 
 ```

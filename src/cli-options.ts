@@ -21,15 +21,51 @@ export const options = [
     default: [] as Array<string>
   },
   {
-    names: ['match', 'm'],
+    names: ['M:f'],
     type: 'arrayOfString',
     help: 'Files must match at least one of these.',
     default: [] as Array<string>
   },
   {
+    names: ['M:d'],
+    type: 'arrayOfString',
+    help: 'Files must match at least one of these.',
+    default: [] as Array<string>
+  },
+  {
+    names: ['match', 'm'],
+    type: 'arrayOfString',
+    help: 'Files/dirs must match at least one of these.',
+    default: [] as Array<string>
+  },
+  {
+    names: ['m:f'],
+    type: 'arrayOfString',
+    help: 'Files must match at least one of these.',
+    default: [] as Array<string>
+  },
+  {
+    names: ['m:d'],
+    type: 'arrayOfString',
+    help: 'Dirs must match at least one of these.',
+    default: [] as Array<string>
+  },
+  {
     names: ['not-match', 'n'],
     type: 'arrayOfString',
+    help: 'Regex that files/dirs cannot match',
+    default: [] as Array<string>
+  },
+  {
+    names: ['n:f'],
+    type: 'arrayOfString',
     help: 'Regex that files cannot match',
+    default: [] as Array<string>
+  },
+  {
+    names: ['n:d'],
+    type: 'arrayOfString',
+    help: 'Regex that folders cannot match',
     default: [] as Array<string>
   },
   {
