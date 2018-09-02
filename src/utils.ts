@@ -2,7 +2,7 @@
 
 export interface SearchResult {
   warningsCount: number,
-  warnings: Array<string>,
+  warnings: Array<Error>,
   results: Array<string>
 }
 
@@ -14,9 +14,20 @@ export interface WaldoOpts {
   symlinks?: boolean,
   paths?: Array<string>,
   path?: string | Array<string>,
+  
   matchesAnyOf?: Array<string | RegExp>,
   matchesNoneOf?: Array<string | RegExp>
   matchesAllOf?: Array<string | RegExp>
+  
+  
+  fileMatchesAnyOf?: Array<string | RegExp>,
+  fileMatchesNoneOf?: Array<string | RegExp>
+  fileMatchesAllOf?: Array<string | RegExp>
+  
+  dirMatchesAnyOf?: Array<string | RegExp>,
+  dirMatchesNoneOf?: Array<string | RegExp>
+  dirMatchesAllOf?: Array<string | RegExp>
+  
   depth?: number,
   printAbsolutePaths: boolean
 }
@@ -31,9 +42,7 @@ export const getUniqueList =  (a: Array<any>) : Array<any> => {
   const set = new Set<any>();
   
   for(let i = 0; i < a.length; i++){
-    if(!set.has(a[i])){
       set.add(a[i]);
-    }
   }
   
   return Array.from(set.values());

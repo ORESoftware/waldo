@@ -12,17 +12,25 @@ export const r2gSmokeTest = function () {
   return true;
 };
 
-
-
 export type EVCb<T> = (err: any, val?: T) => void;
 export type SearchQueueTask = (cb: EVCb<any>) => void;
 
 export class WaldoSearch {
   
   printAbsolutePaths = false;
+  
   matchesNoneRegex: Array<RegExp>;
   matchesAnyRegex: Array<RegExp>;
   matchesAllRegex: Array<RegExp>;
+  
+  fileMatchesNoneRegex: Array<RegExp>;
+  fileMatchesAnyRegex: Array<RegExp>;
+  fileMatchesAllRegex: Array<RegExp>;
+  
+  dirMatchesNoneRegex: Array<RegExp>;
+  dirMatchesAnyRegex: Array<RegExp>;
+  dirMatchesAllRegex: Array<RegExp>;
+  
   isViaCLI = false;
   paths: Array<string>;
   showFiles: boolean;
@@ -31,7 +39,7 @@ export class WaldoSearch {
   queue = async.queue<SearchQueueTask, any>((task, cb) => task(cb), 5);
   depth: number;
   
-  constructor(pth: WaldoOpts| string | Array<string> , opts?: WaldoOpts) {
+  constructor(pth: WaldoOpts | string | Array<string>, opts?: WaldoOpts) {
     
     if (pth && typeof pth === 'object') {
       opts = pth as WaldoOpts;
@@ -40,8 +48,6 @@ export class WaldoSearch {
     else {
       this.paths = getUniqueList(this.getFlattenedPath([pth as string]));
     }
-    
-    console.log('paths:', this.paths);
     
     this.paths.forEach(v => {
       if (!path.isAbsolute(v)) {
@@ -57,9 +63,18 @@ export class WaldoSearch {
     this.isViaCLI = opts.isViaCLI;
     
     this.printAbsolutePaths = opts.printAbsolutePaths === true;
+    
     this.matchesAnyRegex = this.getRegexMap([opts.matchesAnyOf]);
     this.matchesNoneRegex = this.getRegexMap([opts.matchesNoneOf]);
     this.matchesAllRegex = this.getRegexMap([opts.matchesAllOf]);
+    
+    this.fileMatchesAnyRegex = this.getRegexMap([opts.fileMatchesAnyOf]);
+    this.fileMatchesNoneRegex = this.getRegexMap([opts.fileMatchesNoneOf]);
+    this.fileMatchesAllRegex = this.getRegexMap([opts.fileMatchesAllOf]);
+    
+    this.dirMatchesAnyRegex = this.getRegexMap([opts.dirMatchesAnyOf]);
+    this.dirMatchesNoneRegex = this.getRegexMap([opts.dirMatchesNoneOf]);
+    this.dirMatchesAllRegex = this.getRegexMap([opts.dirMatchesAllOf]);
     
     this.showDirs = opts.dirs !== true;
     this.showFiles = opts.files !== true;
@@ -85,6 +100,14 @@ export class WaldoSearch {
     
     return !this.matchesAllRegex.every((r: RegExp) => {
       return r.test(p);
+      
+      if (r.test(p)) {
+        console.log(p, 'matched:', r);
+        return true;
+      }
+      else {
+        console.log(p, 'did not match:', r);
+      }
     });
   }
   
@@ -96,6 +119,14 @@ export class WaldoSearch {
     
     return !this.matchesAnyRegex.some((r: RegExp) => {
       return r.test(p);
+      
+      if (r.test(p)) {
+        console.log(p, 'matched:', r);
+        return true;
+      }
+      else {
+        console.log(p, 'did not match:', r);
+      }
     });
   }
   
@@ -107,14 +138,102 @@ export class WaldoSearch {
     
     return this.matchesNoneRegex.some((r: RegExp) => {
       return r.test(p);
+      
+      if (r.test(p)) {
+        console.log(p, 'matched:', r);
+        return true;
+      }
+      else {
+        console.log(p, 'did not match:', r);
+      }
     });
   }
   
-  searchp(): Promise<Array<string>> {
+  private fileMatchesNone(p: string) {
+    
+    if (this.fileMatchesNoneRegex.length < 1) {
+      return false;
+    }
+    
+    return this.fileMatchesNoneRegex.some((r: RegExp) => {
+      return r.test(p);
+    });
+    
+  }
+  
+  private fileMatchesAny(p: string) {
+    
+    if (this.fileMatchesAnyRegex.length < 1) {
+      return false;
+    }
+    
+    return !this.fileMatchesAnyRegex.some((r: RegExp) => {
+      return r.test(p);
+    });
+    
+  }
+  
+  private fileMatchesAll(p: string) {
+    
+    if (this.fileMatchesAnyRegex.length < 1) {
+      return false;
+    }
+    
+    return !this.fileMatchesAnyRegex.every((r: RegExp) => {
+      return r.test(p);
+    });
+    
+  }
+  
+  private dirMatchesNone(p: string) {
+    
+    if (this.fileMatchesNoneRegex.length < 1) {
+      return false;
+    }
+    
+    return this.dirMatchesNoneRegex.some((r: RegExp) => {
+      return r.test(p);
+    });
+    
+  }
+  
+  private dirMatchesAny(p: string) {
+    
+    if (this.dirMatchesAnyRegex.length < 1) {
+      return false;
+    }
+    
+    return !this.dirMatchesAnyRegex.some((r: RegExp) => {
+      return r.test(p);
+    });
+    
+  }
+  
+  private dirMatchesAll(p: string) {
+    
+    if (this.dirMatchesAnyRegex.length < 1) {
+      return false;
+    }
+    
+    return !this.dirMatchesAnyRegex.every((r: RegExp) => {
+      return r.test(p);
+    });
+    
+  }
+  
+  private dirMatches(p: string) {
+    return this.dirMatchesAll(p) || this.dirMatchesAny(p) || this.dirMatchesNone(p);
+  }
+  
+  private fileMatches(p: string) {
+    return this.fileMatchesAll(p) || this.fileMatchesAny(p) || this.fileMatchesNone(p);
+  }
+  
+  searchp(): Promise<SearchResult> {
     return new Promise((resolve, reject) => {
       const results: Array<string> = [];
-      this._searchDirs(results, null, this.paths, (err) => {
-        err ? reject(err) : resolve(results);
+      this._searchDirs(results, null, this.paths, (err, {warnings, warningsCount}) => {
+        err ? reject(err) : resolve({results, warningsCount, warnings});
       });
     });
   }
@@ -142,16 +261,16 @@ export class WaldoSearch {
     const r = new Transform({
       transform: this.transform || WaldoSearch.__transform
     });
-    this._searchDirs(null, r, this.paths,  (err) => {
+    this._searchDirs(null, r, this.paths, (err) => {
       err ? r.emit('error', err) : r.emit('end');
     });
     return r;
   }
   
-  private _searchDirs(results: Array<string>, t: Transform, dirs: Array<string>, cb: EVCb<any>) {
+  private _searchDirs(results: Array<string>, t: Transform, dirs: Array<string>, cb: EVCb<{ warnings: Array<Error>, warningsCount: number }>) {
     
     let warningsCount = 0;
-    const warnings : Array<Error> = [];
+    const warnings: Array<Error> = [];
     const cwd = process.cwd();
     
     const log = (v: string) => {
@@ -184,15 +303,17 @@ export class WaldoSearch {
           if (err) {
             console.error(chalk.magenta(err.message));
             warningsCount++;
-            if(!this.isViaCLI){
+            if (!this.isViaCLI) {
               warnings.push(err);
             }
             return cb(null);
           }
           
-          const filteredItems = items.map(v => path.resolve(dir + '/' + v)).filter(v => {
+          const filteredItems = items.filter(v => {
+            v = path.relative(cwd, path.resolve(dir + '/' + v));
             return !(this.matchesAny(v) || this.matchesNone(v) || this.matchesAll(v));
-          });
+          })
+          .map(v => path.resolve(dir + '/' + v));
           
           if (filteredItems.length < 1) {
             return cb(null);
@@ -205,29 +326,33 @@ export class WaldoSearch {
               if (err) {
                 console.error(chalk.magenta(err.message));
                 warningsCount++;
-                if(!this.isViaCLI){
+                if (!this.isViaCLI) {
                   warnings.push(err);
                 }
                 return cb(null);
               }
               
               if (!stats.isDirectory()) {
-                // write to stdout if we are using the command line
-                
-                if (this.showFiles) {
+                if (this.showFiles && !this.fileMatches(v)) {
                   log(v);
                 }
-                
                 return cb(null);
               }
               
+              
+              const vRelative = path.relative(cwd, v);
+              
+              if (this.dirMatches(vRelative) || this.dirMatches(vRelative + '/')) {
+                return cb(null);
+              }
+  
               if (this.showDirs) {
                 log(v);
               }
               
-              if (this.matchesAny(v + '/') || this.matchesNone(v + '/') || this.matchesAll(v + '/')) {
-                return cb(null);
-              }
+              // if (this.matchesAny(vRelative + '/') || this.matchesNone(vRelative + '/') || this.matchesAll(vRelative + '/')) {
+              //   return cb(null);
+              // }
               
               search(v, cb);
               
