@@ -1,27 +1,40 @@
 #!/usr/bin/env bash
 
-get_latest_source_waldo(){
-  . "$HOME/.oresoftware/bash/waldo.sh"
+all_export="yep";
+
+if [[ ! "$SHELLOPTS" =~ "allexport" ]]; then
+    all_export="nope";
+    set -a;
+fi
+
+
+
+waldo_get_latest(){
+  . "$BASH_SOURCE" # source this file
 }
 
 waldo(){
 
  if ! type -f waldo &> /dev/null || ! which waldo &> /dev/null; then
 
-       echo "Installing '@oresoftware/waldo' globally...";
+       echo "Installing 'waldo' globally...";
 
-       npm i -s -g '@oresoftware/waldo' || {
-         echo "Could not install the '@oresoftware/waldo' package globally.";
+       npm i -s -g 'waldo' || {
+         echo "Could not install the 'waldo' package globally.";
          echo "Please check your permissions to install NPM packages globally.";
          return 1;
       }
 
    fi
 
-   command waldo $@
+   command "$FUNCNAME" "$@"
 }
 
 
-export -f waldo;
 
+
+
+if [ "$all_export" == "nope" ]; then
+  set +a;
+fi
 

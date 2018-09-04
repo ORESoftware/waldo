@@ -8,7 +8,7 @@ import {Readable, Transform} from "stream";
 import * as assert from 'assert';
 import {flattenDeep, getUniqueList, SearchResult, WaldoOpts} from './utils';
 
-export const r2gSmokeTest =  () => {
+export const r2gSmokeTest = () => {
   return true;
 };
 
